@@ -38,15 +38,12 @@ if (!canvas) {
             console.log("Generated Scramble:", scrambleSequence);
             solutionStepsDiv.textContent = `打亂步驟: ${scrambleSequence}`;
 
-            // 2. Apply scramble to state (Need to implement all moves in CubeState first!)
-            // For now, let's just do a few 'U' moves as a test, since only rotateU is implemented
-            // cubeState.applySequence(scrambleSequence); // This won't work fully yet
-            cubeState.rotateU(); // Apply one U move
-            cubeState.rotateU();
-            cubeState.rotateU();
-            console.log("Applied test rotations to state.");
+            // 2. Apply the generated scramble sequence to the cube state
+            console.log("Applying sequence to state...");
+            cubeState.applySequence(scrambleSequence);
+            console.log("Sequence applied.");
 
-            // 3. Update renderer colors
+            // 3. Update renderer colors to reflect the new state
             renderer.updateColors(cubeState.getState());
             console.log("Renderer colors updated.");
         });

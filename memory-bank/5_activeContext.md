@@ -8,26 +8,29 @@
 
 ## 近期變更
 
-*   將 3D 渲染邏輯重構到 `js/CubeRenderer.js` 模組，並修改其以繪製 3x3x3 結構。
+*   將 3D 渲染邏輯重構到 `js/CubeRenderer.js`。
 *   建立了 `js/CubeState.js` 模組：
-    *   定義了基於面的狀態表示法 (U/R/F/D/L/B)。
-    *   實作了 `createSolvedState`。
-    *   實作了基本的 `generateScramble` 方法。
-    *   實作了 `rotateU` 方法（其他旋轉待辦）。
-    *   實作了 `applySequence` 和 `applyMove` 的基本框架。
-*   更新了 `CubeRenderer.js` 的 `updateColors` 方法，使其能根據 `CubeState` 更新畫面顏色。
+    *   定義了狀態表示法。
+    *   **完成了所有 12 種基本旋轉邏輯 (U/R/F/D/L/B 及其反向)**。
+    *   更新了 `applyMove` 以處理所有基本旋轉。
+    *   改進了 `generateScramble` 以產生包含正反向且更隨機的序列。
+*   更新了 `CubeRenderer.js` 的 `updateColors` 方法。
 *   更新了 `main.js`：
     *   導入並初始化 `CubeState` 和 `CubeRenderer`。
-    *   連接「隨機產生」按鈕：產生序列、顯示序列、**應用測試旋轉 (U轉)** 到狀態、更新畫面顏色。
+    *   **「隨機產生」按鈕現在可以應用完整的隨機序列到狀態，並更新畫面顏色**。
 
 ## 下一步計畫
 
-1.  **完成旋轉邏輯**: 在 `CubeState.js` 中實作所有標準旋轉 (R, F, D, L, B, U', R', F', D', L', B') 以及可選的雙倍旋轉 (U2, R2 等)。這是實現完整打亂和解題功能的基礎。
-2.  **改進 Scramble**:
-    *   在 `CubeState.js` 的 `generateScramble` 中加入反向和雙倍旋轉。
-    *   加入更完善的邏輯以避免無效或冗餘的步驟 (例如 U U', R L R')。
-3.  **應用完整 Scramble**: 修改 `main.js` 中的 `randomizeBtn` 事件處理器，調用 `cubeState.applySequence(scrambleSequence)` 來應用完整的隨機序列，而不是目前的測試旋轉。
-4.  **動畫引擎**: 開始設計和實作旋轉動畫，而不僅僅是靜態地更新顏色。
+1.  **動畫引擎**: 設計和實作單步旋轉動畫。這將是使魔術方塊「動起來」的關鍵步驟，需要：
+    *   修改 `CubeRenderer` 以支援繪製旋轉中的狀態（可能需要傳遞旋轉軸、角度和涉及的小方塊）。
+    *   建立一個動畫控制器，根據序列逐步執行旋轉，並在 `requestAnimationFrame` 中更新角度和重繪。
+    *   修改 `applySequence` 或相關邏輯，使其觸發動畫而不是立即改變狀態。
+2.  **解題演算法整合**:
+    *   研究並選擇一個合適的 JavaScript 魔術方塊解題函式庫 (如 `cubejs` 或其他)。
+    *   將其整合到專案中。
+    *   連接「自動解題」按鈕，使其獲取當前狀態、調用解題器、獲取解題序列。
+3.  **解題動畫播放**: 將解題序列傳遞給動畫引擎進行播放。
+4.  **UI/UX 優化**: 例如，在動畫播放期間禁用按鈕，顯示當前步驟等。
 
 ## 當前決策與考量
 

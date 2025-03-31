@@ -1,5 +1,6 @@
 import { CubeRenderer } from './js/CubeRenderer.js';
 import { CubeState } from './js/CubeState.js';
+import { solve as solveCube, initialize as initializeSolver } from './js/lib/solver.js'; // Import the dummy solver
 
 console.log("main.js loaded");
 
@@ -21,7 +22,8 @@ if (!canvas) {
     } else {
         console.log("Canvas context obtained successfully.");
 
-        // --- Initialize State and Renderer ---
+        // --- Initialize Solver, State and Renderer ---
+        initializeSolver(); // Initialize the dummy solver
         const cubeState = new CubeState();
         const renderer = new CubeRenderer(canvas, ctx);
 
@@ -50,8 +52,23 @@ if (!canvas) {
 
         solveBtn.addEventListener('click', () => {
             console.log("Solve button clicked");
-            solutionStepsDiv.textContent = "自動解題按鈕被點擊 (功能尚未實作)";
-            // TODO: Implement solve logic and animation
+            solutionStepsDiv.textContent = "計算解法中...";
+
+            // 1. Get current state string
+            const stateString = cubeState.toSolverString();
+            console.log("Current state string:", stateString);
+
+            // 2. Call the solver (dummy version for now)
+            try {
+                const solution = solveCube(stateString);
+                console.log("Received solution:", solution);
+                solutionStepsDiv.textContent = `解法步驟: ${solution}`;
+
+                // TODO: Implement animation based on the solution sequence
+            } catch (error) {
+                 console.error("Error during solving:", error);
+                 solutionStepsDiv.textContent = `解題時發生錯誤: ${error.message}`;
+            }
         });
 
         // --- Core Logic (Placeholders) ---

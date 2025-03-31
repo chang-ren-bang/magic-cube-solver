@@ -282,4 +282,34 @@ export class CubeState {
 
         return scramble.join(' ');
     }
+
+    // Converts the current state to a string format suitable for many solvers
+    // Format: 54 characters representing facelets in URFDLB order.
+    toSolverString() {
+        // Map our internal color hex codes back to single characters (U, R, F, D, L, B)
+        const colorToFaceChar = {};
+        Object.entries(SOLVED_STATE_COLORS).forEach(([faceChar, colorHex]) => {
+            colorToFaceChar[colorHex] = faceChar;
+        });
+
+        let solverString = "";
+        // Order: U, R, F, D, L, B
+        const faceOrder = ['U', 'R', 'F', 'D', 'L', 'B'];
+
+        faceOrder.forEach(face => {
+            if (!this.state[face]) {
+                console.error(`Face ${face} not found in state!`);
+                solverString += "EEEEEEEEE"; // Add error placeholder
+                return;
+            }
+            this.state[face].forEach(colorHex => {
+                solverString += colorToFaceChar[colorHex] || 'E'; // Use 'E' for unknown colors
+            });
+        });
+
+        if (solverString.length !== 54) {
+             console.error(`Generated solver string has incorrect length: ${solverString.length}`);
+        }
+        return solverString;
+    }
 }

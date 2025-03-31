@@ -8,25 +8,26 @@
 
 ## 近期變更
 
-*   建立了 Memory Bank 的所有核心文件 (1-6)。
-*   建立了 `index.html`, `style.css`, `main.js`。
-*   在 `main.js` 中實作了基礎的 3D 立方體渲染：
-    *   定義了頂點、面和顏色。
-    *   實作了 Y 軸和 X 軸旋轉函數。
-    *   實作了簡單的透視投影函數。
-    *   建立了一個動畫迴圈 (`requestAnimationFrame`)，使立方體持續旋轉。
-    *   實作了基於面平均 Z 值的簡單深度排序繪製。
+*   將 3D 渲染邏輯重構到 `js/CubeRenderer.js` 模組，並修改其以繪製 3x3x3 結構。
+*   建立了 `js/CubeState.js` 模組：
+    *   定義了基於面的狀態表示法 (U/R/F/D/L/B)。
+    *   實作了 `createSolvedState`。
+    *   實作了基本的 `generateScramble` 方法。
+    *   實作了 `rotateU` 方法（其他旋轉待辦）。
+    *   實作了 `applySequence` 和 `applyMove` 的基本框架。
+*   更新了 `CubeRenderer.js` 的 `updateColors` 方法，使其能根據 `CubeState` 更新畫面顏色。
+*   更新了 `main.js`：
+    *   導入並初始化 `CubeState` 和 `CubeRenderer`。
+    *   連接「隨機產生」按鈕：產生序列、顯示序列、**應用測試旋轉 (U轉)** 到狀態、更新畫面顏色。
 
 ## 下一步計畫
 
-1.  **程式碼組織**: 將 `main.js` 中的 3D 渲染邏輯 (頂點/面數據、轉換函數、繪圖函數) 提取到一個獨立的模組或類別中 (例如 `CubeRenderer.js`)，以提高可維護性。
-2.  **魔術方塊結構**: 將單一立方體的渲染擴展為 3x3x3 的魔術方塊結構。這需要：
-    *   定義 27 個小立方體 (cubies) 的位置和初始狀態。
-    *   修改渲染邏輯以繪製所有小立方體。
-    *   設計數據結構來表示整個魔術方塊的狀態（每個小方塊的位置和每個面的顏色）。
-3.  **隨機產生功能**: 開始實作「隨機產生」按鈕的功能，需要：
-    *   找到或實作一個產生隨機打亂序列的方法。
-    *   實作應用該序列來修改魔術方塊狀態的邏輯。
+1.  **完成旋轉邏輯**: 在 `CubeState.js` 中實作所有標準旋轉 (R, F, D, L, B, U', R', F', D', L', B') 以及可選的雙倍旋轉 (U2, R2 等)。這是實現完整打亂和解題功能的基礎。
+2.  **改進 Scramble**:
+    *   在 `CubeState.js` 的 `generateScramble` 中加入反向和雙倍旋轉。
+    *   加入更完善的邏輯以避免無效或冗餘的步驟 (例如 U U', R L R')。
+3.  **應用完整 Scramble**: 修改 `main.js` 中的 `randomizeBtn` 事件處理器，調用 `cubeState.applySequence(scrambleSequence)` 來應用完整的隨機序列，而不是目前的測試旋轉。
+4.  **動畫引擎**: 開始設計和實作旋轉動畫，而不僅僅是靜態地更新顏色。
 
 ## 當前決策與考量
 

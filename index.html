@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>魔術方塊解題動畫</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <h1>魔術方塊解題動畫</h1>
+
+    <div class="controls">
+        <button id="randomizeBtn">隨機產生</button>
+        <button id="solveBtn">自動解題</button>
+    </div>
+
+    <div class="display">
+        <canvas id="cubeCanvas" width="600" height="400">
+            您的瀏覽器不支援 Canvas。
+        </canvas>
+        <div id="solutionSteps">
+            解題步驟將顯示於此...
+        </div>
+    </div>
+
+    <script type="module" src="main.js"></script>
+</body>
+</html>

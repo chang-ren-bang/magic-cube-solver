@@ -20,11 +20,15 @@
   - Google Gemini 2.5 Pro（初期）
   - VSCode LM API 的 Claude 3.5（後期）
 
+## 線上展示
+
+🌐 **[在線演示](https://chang-ren-bang.github.io/magic-cube-solver)** - 通過 GitHub Pages 託管
+
 ## 快速開始
 
 1. 克隆專案：
 ```bash
-git clone https://github.com/yourusername/magic-cube-solver.git
+git clone https://github.com/chang-ren-bang/magic-cube-solver.git
 cd magic-cube-solver
 ```
 
@@ -72,6 +76,18 @@ cd magic-cube-solver
 ## 授權
 
 本專案採用 MIT 授權條款。
+
+## 部署
+
+本專案使用 GitHub Pages 進行部署。若要部署你的版本：
+
+1. Fork 此專案到你的 GitHub 帳號
+2. 進入專案倉庫的 Settings 頁面
+3. 找到 Pages 選項（在左側選單）
+4. 在 Source 部分選擇 main 分支
+5. 選擇 root (/) 作為發布來源
+6. 儲存設定後等待部署完成
+7. 你的網站將會在 `https://[你的GitHub用戶名].github.io/magic-cube-solver` 上線
 
 ## 貢獻
 

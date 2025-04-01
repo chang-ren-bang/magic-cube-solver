@@ -1,6 +1,6 @@
 import { CubeRenderer } from './js/CubeRenderer.js';
 import { CubeState } from './js/CubeState.js';
-import { solve as solveCube, initialize as initializeSolver } from './js/lib/solver.js'; // Import the dummy solver
+import { solve as simpleSolve } from './js/SimpleSolver.js'; // Import our simple solver
 
 console.log("main.js loaded");
 
@@ -14,16 +14,20 @@ const solutionStepsDiv = document.getElementById('solutionSteps');
 if (!canvas) {
     console.error("Canvas element not found!");
 } else {
-    const ctx = canvas.getContext('2d');
+    // No longer need async, removed Cube.asyncInit()
+    function initializeApp() {
+        const ctx = canvas.getContext('2d');
 
-    if (!ctx) {
-        console.error("Failed to get 2D context from canvas!");
-        solutionStepsDiv.textContent = "無法取得 Canvas 2D context，繪圖功能可能無法使用。";
-    } else {
-        console.log("Canvas context obtained successfully.");
+        if (!ctx) {
+            console.error("Failed to get 2D context from canvas!");
+            solutionStepsDiv.textContent = "無法取得 Canvas 2D context，繪圖功能可能無法使用。";
+            return; // Stop initialization if context fails
+        } else {
+            console.log("Canvas context obtained successfully.");
+        }
 
-        // --- Initialize Solver, State and Renderer ---
-        initializeSolver(); // Initialize the dummy solver
+        // --- Initialize State and Renderer ---
+        // Removed cubejs initialization logic
         const cubeState = new CubeState();
         const renderer = new CubeRenderer(canvas, ctx);
 
@@ -52,29 +56,34 @@ if (!canvas) {
 
         solveBtn.addEventListener('click', () => {
             console.log("Solve button clicked");
-            solutionStepsDiv.textContent = "計算解法中...";
+            solutionStepsDiv.textContent = "計算解法中 (使用簡易解題器)...";
 
             // 1. Get current state string
             const stateString = cubeState.toSolverString();
             console.log("Current state string:", stateString);
 
-            // 2. Call the solver (dummy version for now)
+            // 2. Call our simple solver
             try {
-                const solution = solveCube(stateString);
-                console.log("Received solution:", solution);
-                solutionStepsDiv.textContent = `解法步驟: ${solution}`;
+                const solution = simpleSolve(stateString); // Use our imported function
+                console.log("Received simple solution:", solution);
+                solutionStepsDiv.textContent = `簡易解法步驟: ${solution}`;
 
                 // TODO: Implement animation based on the solution sequence
             } catch (error) {
-                 console.error("Error during solving:", error);
-                 solutionStepsDiv.textContent = `解題時發生錯誤: ${error.message}`;
+                 console.error("Error during simple solving:", error);
+                 solutionStepsDiv.textContent = `簡易解題時發生錯誤: ${error.message}`;
             }
         });
 
         // --- Core Logic (Placeholders) ---
-        // TODO: Implement Cube State Manager
-        // TODO: Implement 3D Renderer
+        // TODO: Implement Cube State Manager (partially done)
+        // TODO: Implement 3D Renderer (partially done)
         // TODO: Implement Animation Engine
-        // TODO: Implement Solver Interface
+        // TODO: Implement Solver Interface (partially done)
+
+        console.log("Application initialized.");
     }
+
+    // Call the initialization function
+    initializeApp(); // No longer needs .catch for async errors here
 }

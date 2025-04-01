@@ -16,6 +16,7 @@ if (!canvas) {
 } else {
     // No longer need async, removed Cube.asyncInit()
     function initializeApp() {
+        let lastScrambleSequence = null; // Variable to store the last scramble
         const ctx = canvas.getContext('2d');
 
         if (!ctx) {
@@ -40,14 +41,16 @@ if (!canvas) {
             console.log("Randomize button clicked");
 
             // 1. Generate scramble
-            const scrambleSequence = cubeState.generateScramble(20); // Generate a 20-move scramble
-            console.log("Generated Scramble:", scrambleSequence);
-            solutionStepsDiv.textContent = `打亂步驟: ${scrambleSequence}`;
+            const currentScramble = cubeState.generateScramble(20); // Generate a 20-move scramble
+            lastScrambleSequence = currentScramble; // Store the generated scramble
+            console.log("Generated Scramble:", currentScramble);
+            solutionStepsDiv.textContent = `打亂步驟: ${currentScramble}`;
 
             // 2. Apply the generated scramble sequence to the cube state
             console.log("Applying sequence to state...");
-            cubeState.applySequence(scrambleSequence);
+            cubeState.applySequence(currentScramble); // Apply the current scramble
             console.log("Sequence applied.");
+            // Removed duplicate log and incorrect applySequence call
 
             // 3. Update renderer colors to reflect the new state
             renderer.updateColors(cubeState.getState());
@@ -56,17 +59,22 @@ if (!canvas) {
 
         solveBtn.addEventListener('click', () => {
             console.log("Solve button clicked");
-            solutionStepsDiv.textContent = "計算解法中 (使用簡易解題器)...";
 
-            // 1. Get current state string
-            const stateString = cubeState.toSolverString();
-            console.log("Current state string:", stateString);
+            if (!lastScrambleSequence) {
+                solutionStepsDiv.textContent = "請先產生一個隨機序列。";
+                console.warn("Solve clicked before scrambling.");
+                return;
+            }
 
-            // 2. Call our simple solver
+            solutionStepsDiv.textContent = "計算解法中 (反轉打亂序列)...";
+
+            // 1. No need to get state string anymore
+
+            // 2. Call our simple solver with the last scramble sequence
             try {
-                const solution = simpleSolve(stateString); // Use our imported function
-                console.log("Received simple solution:", solution);
-                solutionStepsDiv.textContent = `簡易解法步驟: ${solution}`;
+                const solution = simpleSolve(lastScrambleSequence); // Pass the stored scramble
+                console.log("Received reversed scramble:", solution);
+                solutionStepsDiv.textContent = `簡易解法 (反轉打亂): ${solution}`;
 
                 // TODO: Implement animation based on the solution sequence
             } catch (error) {

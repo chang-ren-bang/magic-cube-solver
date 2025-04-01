@@ -1,27 +1,38 @@
 // js/SimpleSolver.js
 
 /**
- * A very simple placeholder solver.
- * Currently returns a fixed sequence for testing purposes.
+ * A "naive" solver that simply reverses a given scramble sequence.
+ * It takes the scramble sequence, reverses the order of moves,
+ * and inverts each move (R -> R', U' -> U).
  *
- * @param {string} stateString - The 54-character cube state string (URFDLB).
- * @returns {string} A sequence of moves to solve the cube (currently fixed).
+ * @param {string} scrambleSequence - The scramble sequence string (e.g., "R U F'").
+ * @returns {string} The reversed and inverted sequence.
  */
-export function solve(stateString) {
-    console.log("Using SimpleSolver for state:", stateString);
+export function solve(scrambleSequence) {
+    console.log("Using SimpleSolver (naive reverse) for scramble:", scrambleSequence);
 
-    // --- Placeholder Logic ---
-    // In a real simple solver, you'd analyze the stateString here
-    // and apply basic algorithms (e.g., for the white cross, first layer corners).
-    // This is complex to implement correctly.
+    if (!scrambleSequence || typeof scrambleSequence !== 'string' || scrambleSequence.trim().length === 0) {
+        console.warn("SimpleSolver received an empty or invalid scramble sequence.");
+        return ""; // Return empty if no valid scramble provided
+    }
 
-    // For now, return a fixed sequence for demonstration.
-    // This sequence likely won't solve most scrambles.
-    const placeholderSolution = "R U R' U' F' U F"; // A common sequence, but not a real solve
+    const moves = scrambleSequence.trim().split(/\s+/);
+    const reversedMoves = moves.reverse(); // Reverse the order of moves
 
-    console.log("SimpleSolver returning placeholder solution:", placeholderSolution);
-    return placeholderSolution;
+    const invertedSequence = reversedMoves.map(move => {
+        if (move.endsWith("'")) {
+            // If it's a prime move (e.g., R'), remove the prime
+            return move.slice(0, -1);
+        } else if (move.endsWith('2')) {
+             // If it's a double move (e.g., U2), it stays the same when inverted
+             // (Assuming CubeState handles double moves, which it currently might not fully)
+             return move;
+        } else {
+            // If it's a standard move (e.g., F), add a prime
+            return move + "'";
+        }
+    }).join(' '); // Join the inverted moves back into a string
+
+    console.log("SimpleSolver returning inverted sequence:", invertedSequence);
+    return invertedSequence;
 }
-
-// You might add helper functions here later to analyze the state,
-// identify pieces, check orientations, etc.

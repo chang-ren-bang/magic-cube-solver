@@ -17,22 +17,15 @@ if (!canvas) {
     // No longer need async, removed Cube.asyncInit()
     function initializeApp() {
         let lastScrambleSequence = null; // Variable to store the last scramble
-        const ctx = canvas.getContext('2d');
-
-        if (!ctx) {
-            console.error("Failed to get 2D context from canvas!");
-            solutionStepsDiv.textContent = "無法取得 Canvas 2D context，繪圖功能可能無法使用。";
-            return; // Stop initialization if context fails
-        } else {
-            console.log("Canvas context obtained successfully.");
-        }
+        // const ctx = canvas.getContext('2d'); // No longer needed for Three.js
 
         // --- Initialize State and Renderer ---
         // Removed cubejs initialization logic
         const cubeState = new CubeState();
-        const renderer = new CubeRenderer(canvas, ctx);
+        // Pass only the canvas element to the new Three.js renderer
+        const renderer = new CubeRenderer(canvas);
 
-        // Initial draw with solved state colors
+        // Initial color update and start animation loop
         renderer.updateColors(cubeState.getState());
         renderer.startAnimation(); // Start the drawing loop
 

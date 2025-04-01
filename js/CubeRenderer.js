@@ -76,12 +76,26 @@ export class CubeRenderer {
             for (let y = -1; y <= 1; y++) {
                 for (let z = -1; z <= 1; z++) {
                     if (x === 0 && y === 0 && z === 0) continue;
-                    const cubieMaterials = Array(6).fill(this.materials.INSIDE);
-                    const cubie = new THREE.Mesh(geometry, cubieMaterials);
-                    cubie.position.set(x * totalSize, y * totalSize, z * totalSize);
-                    cubie.userData = { x, y, z, id: `cubie_${x}_${y}_${z}` };
-                    this.cubies.push(cubie);
-                    this.cubeGroup.add(cubie);
+        // 初始化方塊顏色
+        const cubieMaterials = [];
+        // 右面 (x = 1) -> 橙色
+        cubieMaterials[0] = x === 1 ? this.materials.ORANGE : this.materials.INSIDE;
+        // 左面 (x = -1) -> 紅色
+        cubieMaterials[1] = x === -1 ? this.materials.RED : this.materials.INSIDE;
+        // 上面 (y = 1) -> 黃色
+        cubieMaterials[2] = y === 1 ? this.materials.YELLOW : this.materials.INSIDE;
+        // 下面 (y = -1) -> 白色
+        cubieMaterials[3] = y === -1 ? this.materials.WHITE : this.materials.INSIDE;
+        // 前面 (z = 1) -> 綠色
+        cubieMaterials[4] = z === 1 ? this.materials.GREEN : this.materials.INSIDE;
+        // 後面 (z = -1) -> 藍色
+        cubieMaterials[5] = z === -1 ? this.materials.BLUE : this.materials.INSIDE;
+
+        const cubie = new THREE.Mesh(geometry, cubieMaterials);
+        cubie.position.set(x * totalSize, y * totalSize, z * totalSize);
+        cubie.userData = { x, y, z, id: `cubie_${x}_${y}_${z}` };
+        this.cubies.push(cubie);
+        this.cubeGroup.add(cubie);
                 }
             }
         }
@@ -92,58 +106,6 @@ export class CubeRenderer {
         this.isAnimating = false;
     }
 
-    updateColors(cubeStateData) { /* ... (updateColors logic remains the same) ... */
-        console.log("Updating Three.js renderer colors...");
-        if (!cubeStateData) {
-            console.error("Cube state data is missing in updateColors.");
-            return;
-        }
-        this.cubies.forEach(cubie => {
-            if (!Array.isArray(cubie.material)) cubie.material = Array(6).fill(this.materials.INSIDE);
-            else for (let i = 0; i < 6; i++) cubie.material[i] = this.materials.INSIDE;
-        });
-        const faceStickerIndices = { /* ... face mapping ... */
-            'U': [{ y: 1 }, 2], 'D': [{ y: -1 }, 3], 'L': [{ x: -1 }, 1],
-            'R': [{ x: 1 }, 0], 'F': [{ z: 1 }, 4], 'B': [{ z: -1 }, 5]
-        };
-        const stickerToCoordMap = (face, index) => { /* ... sticker mapping ... */
-            const row = Math.floor(index / 3), col = index % 3, mapCoord = c => c - 1;
-            switch (face) {
-                case 'U': return { x: mapCoord(col), z: mapCoord(row) * -1 };
-                case 'D': return { x: mapCoord(col), z: mapCoord(row) };
-                case 'L': return { y: mapCoord(row) * -1, z: mapCoord(col) };
-                case 'R': return { y: mapCoord(row) * -1, z: mapCoord(col) * -1 };
-                case 'F': return { x: mapCoord(col), y: mapCoord(row) * -1 };
-                case 'B': return { x: mapCoord(col) * -1, y: mapCoord(row) * -1 };
-                default: return null;
-            }
-        };
-        Object.entries(cubeStateData).forEach(([faceName, stickers]) => {
-            const mapping = faceStickerIndices[faceName]; if (!mapping) return;
-            const [coordFilter, faceIndex] = mapping;
-            stickers.forEach((colorHexString, stickerIndex) => {
-                const targetCoords = stickerToCoordMap(faceName, stickerIndex); if (!targetCoords) return;
-                const targetCubie = this.cubies.find(cubie => {
-                    const keys = Object.keys(targetCoords);
-                    const stickerMatch = keys.every(key => cubie.userData[key] === targetCoords[key]);
-                    if (!stickerMatch) return false;
-                    const filterKey = Object.keys(coordFilter)[0];
-                    return cubie.userData[filterKey] === coordFilter[filterKey];
-                });
-                if (targetCubie) {
-                    const threeColorHex = HEX_STRING_TO_THREE_COLOR[colorHexString.toUpperCase()];
-                    const material = Object.values(this.materials).find(m => m.color.getHex() === threeColorHex) || this.materials.GRAY;
-                    if (Array.isArray(targetCubie.material)) targetCubie.material[faceIndex] = material;
-                    else {
-                        console.warn("Cubie material was not an array for", targetCubie.userData.id);
-                        const newMaterials = Array(6).fill(this.materials.INSIDE);
-                        newMaterials[faceIndex] = material; targetCubie.material = newMaterials;
-                    }
-                }
-            });
-        });
-        console.log("Three.js color update finished.");
-    }
 
     startAnimation() {
         if (this.animationFrameId) cancelAnimationFrame(this.animationFrameId);
@@ -176,12 +138,21 @@ export class CubeRenderer {
         if (!axisChar) {
             console.error(`Invalid move base: ${baseMove}`); this.isAnimating = false; return;
         }
+        // 計算旋轉角度
         let angle = Math.PI / 2;
-        if (move.endsWith("'")) angle = -angle;
-        else if (move.endsWith("2")) angle = Math.PI;
-        if (['D', 'L', 'B'].includes(baseMove)) angle = -angle;
-        if (move.endsWith("'") && ['D', 'L', 'B'].includes(baseMove)) angle = -angle;
-        if (move.endsWith("2") && ['D', 'L', 'B'].includes(baseMove)) angle = -angle;
+        
+        // 處理基本角度方向
+        // D、L、B 面的基本旋轉方向與 U、R、F 相反
+        if (['D', 'L', 'B'].includes(baseMove)) {
+            angle = -angle;
+        }
+        
+        // 處理修飾符
+        if (move.endsWith("'")) {
+            angle = -angle; // 反向旋轉
+        } else if (move.endsWith("2")) {
+            angle = angle * 2; // 雙倍旋轉，保持原方向
+        }
 
         const rotationAxis = new THREE.Vector3();
         if (axisChar === 'x') rotationAxis.set(1, 0, 0);
@@ -263,5 +234,20 @@ export class CubeRenderer {
     }
     resize(width, height) { /* ... (remains the same) ... */
         this.camera.aspect = width / height; this.camera.updateProjectionMatrix(); this.renderer.setSize(width, height);
+    }
+
+    // 重置方塊到初始狀態
+    reset() {
+        this.isAnimating = true;
+        const totalSize = 1 + 0.05; // cubieSize + spacing
+
+        // 重置每個方塊的位置和旋轉
+        this.cubies.forEach(cubie => {
+            const { x, y, z } = cubie.userData;
+            cubie.position.set(x * totalSize, y * totalSize, z * totalSize);
+            cubie.quaternion.identity(); // 重置旋轉
+        });
+
+        this.isAnimating = false;
     }
 }

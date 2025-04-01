@@ -19,19 +19,20 @@ export function solve(scrambleSequence) {
     const moves = scrambleSequence.trim().split(/\s+/);
     const reversedMoves = moves.reverse(); // Reverse the order of moves
 
+    // 反轉序列順序並反轉每一步的操作
     const invertedSequence = reversedMoves.map(move => {
+        // 處理不同類型的動作
         if (move.endsWith("'")) {
-            // If it's a prime move (e.g., R'), remove the prime
+            // 如果是逆時針操作（如 R'），移除撇號變成順時針
             return move.slice(0, -1);
         } else if (move.endsWith('2')) {
-             // If it's a double move (e.g., U2), it stays the same when inverted
-             // (Assuming CubeState handles double moves, which it currently might not fully)
-             return move;
+            // 如果是雙倍旋轉（如 U2），保持不變
+            return move;
         } else {
-            // If it's a standard move (e.g., F), add a prime
+            // 如果是順時針操作（如 F），加上撇號變成逆時針
             return move + "'";
         }
-    }).join(' '); // Join the inverted moves back into a string
+    }).join(' ');
 
     console.log("SimpleSolver returning inverted sequence:", invertedSequence);
     return invertedSequence;

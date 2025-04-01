@@ -1,6 +1,5 @@
 import { CubeRenderer } from './js/CubeRenderer.js';
-import { CubeState } from './js/CubeState.js';
-import { solve as simpleSolve } from './js/SimpleSolver.js'; // Import our simple solver
+import { solve as simpleSolve } from './js/SimpleSolver.js';
 
 console.log("main.js loaded");
 
@@ -16,18 +15,9 @@ if (!canvas) {
 } else {
     // No longer need async, removed Cube.asyncInit()
     function initializeApp() {
-        let lastScrambleSequence = null; // Variable to store the last scramble
-        // const ctx = canvas.getContext('2d'); // No longer needed for Three.js
-
-        // --- Initialize State and Renderer ---
-        // Removed cubejs initialization logic
-        const cubeState = new CubeState();
-        // Pass only the canvas element to the new Three.js renderer
+        let lastScrambleSequence = null;
         const renderer = new CubeRenderer(canvas);
-
-        // Initial color update and start animation loop
-        renderer.updateColors(cubeState.getState());
-        renderer.startAnimation(); // Start the drawing loop
+        renderer.startAnimation();
 
         // --- Event Listeners ---
         // Make the listener async to use await for animations
@@ -40,52 +30,53 @@ if (!canvas) {
             randomizeBtn.disabled = true; // Disable button during animation
             solveBtn.disabled = true; // Disable solve button too
 
-            // 1. Generate scramble
-            const currentScramble = cubeState.generateScramble(20); // Generate a 20-move scramble
-            lastScrambleSequence = currentScramble; // Store the generated scramble
+            // 先重置方塊狀態
+            renderer.reset();
+            console.log("Reset cube to initial state");
+
+            // 生成打亂序列
+            const baseMoves = ['U', 'R', 'F', 'D', 'L', 'B'];
+            const modifiers = ['', "'"];
+            const moves = [];
+            let lastMove = null;
+
+            // 生成 20 步的打亂
+            for (let i = 0; i < 20; i++) {
+                let move;
+                do {
+                    const baseMove = baseMoves[Math.floor(Math.random() * baseMoves.length)];
+                    const modifier = modifiers[Math.floor(Math.random() * modifiers.length)];
+                    move = baseMove + modifier;
+                } while (lastMove && move[0] === lastMove[0]); // 避免連續旋轉同一面
+                moves.push(move);
+                lastMove = move;
+            }
+
+            const currentScramble = moves.join(' ');
+            lastScrambleSequence = currentScramble;
             console.log("Generated Scramble:", currentScramble);
             solutionStepsDiv.textContent = `打亂步驟: ${currentScramble}`;
 
-            // 2. Animate the scramble sequence step-by-step
-            const moves = currentScramble.trim().split(/\s+/);
-            console.log("Animating scramble sequence...");
-            solutionStepsDiv.textContent = `打亂動畫中: ${currentScramble}`; // Show full sequence initially
-
+            // 依序執行打亂動作
             for (const move of moves) {
-                if (!move) continue; // Skip empty strings if any
-                console.log(`Animating move: ${move}`);
                 try {
-                    // Animate the move visually
-                    await renderer.animateRotation(move, 1000); // Wait for 1s animation
-
-                    // Update the internal state AFTER the visual animation completes
-                    cubeState.applyMove(move);
-
-                    // Optional: Update colors based on state (might be redundant if animation handles visuals)
-                    // renderer.updateColors(cubeState.getState());
-
-                    console.log(`Move ${move} applied to state.`);
-
+                    await renderer.animateRotation(move, 500);
+                    console.log(`Move ${move} applied.`);
                 } catch (error) {
                     console.error(`Error animating move ${move}:`, error);
                     solutionStepsDiv.textContent = `動畫錯誤於步驟 ${move}: ${error.message}`;
-                    // Decide how to handle error - break, continue? For now, break.
                     break;
                 }
             }
 
-            // 3. Final color update after all animations (ensures consistency)
-            renderer.updateColors(cubeState.getState());
-            console.log("Scramble animation finished. Renderer colors updated.");
+            console.log("Scramble animation finished.");
             solutionStepsDiv.textContent = `打亂完成: ${currentScramble}`;
-
-            randomizeBtn.disabled = false; // Re-enable button
+            randomizeBtn.disabled = false;
             solveBtn.disabled = false;
         });
 
-        // TODO: Update solveBtn listener similarly to animate the solution sequence
-        solveBtn.addEventListener('click', () => {
-             if (renderer.isAnimating) {
+        solveBtn.addEventListener('click', async () => {
+            if (renderer.isAnimating) {
                 console.log("Animation in progress, ignoring solve click.");
                 return;
             }
@@ -97,21 +88,31 @@ if (!canvas) {
                 return;
             }
 
+            randomizeBtn.disabled = true;
+            solveBtn.disabled = true;
             solutionStepsDiv.textContent = "計算解法中 (反轉打亂序列)...";
 
-            // 1. No need to get state string anymore
-
-            // 2. Call our simple solver with the last scramble sequence
             try {
-                const solution = simpleSolve(lastScrambleSequence); // Pass the stored scramble
-                console.log("Received reversed scramble:", solution);
-                solutionStepsDiv.textContent = `簡易解法 (反轉打亂): ${solution}`;
+                const solution = simpleSolve(lastScrambleSequence);
+                console.log("Received solution:", solution);
+                solutionStepsDiv.textContent = `解法步驟: ${solution}`;
 
-                // TODO: Implement animation based on the solution sequence
+                // 執行解法動作
+                const solutionMoves = solution.trim().split(/\s+/);
+                for (const move of solutionMoves) {
+                    await renderer.animateRotation(move, 500);
+                    console.log(`Solution move ${move} applied.`);
+                }
+
+                console.log("Solution animation finished.");
+                solutionStepsDiv.textContent = `解法完成: ${solution}`;
             } catch (error) {
-                 console.error("Error during simple solving:", error);
-                 solutionStepsDiv.textContent = `簡易解題時發生錯誤: ${error.message}`;
+                console.error("Error during solving:", error);
+                solutionStepsDiv.textContent = `解題時發生錯誤: ${error.message}`;
             }
+
+            randomizeBtn.disabled = false;
+            solveBtn.disabled = false;
         });
 
         // --- Core Logic (Placeholders) ---

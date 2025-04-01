@@ -23,6 +23,11 @@
 
 ## 技術限制與挑戰
 
+*   **AI 協助開發**:
+    - 初期使用 Google Gemini 2.5 Pro (google/gemini-2.5-pro-exp-03-25:free)
+    - 當 OpenRouter 與 Google Gemini 額度用盡後
+    - 改用 VSCode LM API 的 Claude 3.5 完成開發
+
 *   **Three.js 使用**: 
     - 需要熟悉 Three.js 的 API 和概念
     - 正確處理幾何體、材質、光照等設定

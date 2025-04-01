@@ -4,27 +4,28 @@
 
 ```mermaid
 graph TD
-    subgraph Frontend (Browser)
-        A[HTML Structure] --> B(CSS Styling);
-        A --> C{JavaScript Logic};
-        B --> D[UI (Buttons, Text Display)];
-        C --> E[Three.js Renderer];
-        C --> G[Animation Engine];
-        C --> H[Solver Algorithm Interface];
-        E --> I(Canvas Element);
-        G --> E;
-        H --> G;
-        D -- Trigger --> C;
-        H --> C;
+    subgraph Frontend[Browser]
+        A[HTML Structure]
+        B[CSS Styling]
+        C[JavaScript Logic]
+        D[UI Controls]
+        E[Three.js Renderer]
+        G[Animation Engine]
+        H[Solver Interface]
+        I[Canvas]
+        
+        A --> B
+        A --> C
+        B --> D
+        C --> E
+        C --> G
+        C --> H
+        E --> I
+        G --> E
+        H --> G
+        D -- Trigger --> C
+        H --> C
     end
-# 3. 系統模式 (System Patterns)
-
-## 系統架構 (初步設想)
-
-```mermaid
-graph TD
-
-    %% External Libraries/Logic subgraph removed or marked as internal
 ```
 
 ## 關鍵技術決策

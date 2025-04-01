@@ -30,8 +30,15 @@ if (!canvas) {
         renderer.startAnimation(); // Start the drawing loop
 
         // --- Event Listeners ---
-        randomizeBtn.addEventListener('click', () => {
+        // Make the listener async to use await for animations
+        randomizeBtn.addEventListener('click', async () => {
+            if (renderer.isAnimating) {
+                console.log("Animation in progress, ignoring randomize click.");
+                return;
+            }
             console.log("Randomize button clicked");
+            randomizeBtn.disabled = true; // Disable button during animation
+            solveBtn.disabled = true; // Disable solve button too
 
             // 1. Generate scramble
             const currentScramble = cubeState.generateScramble(20); // Generate a 20-move scramble
@@ -39,18 +46,49 @@ if (!canvas) {
             console.log("Generated Scramble:", currentScramble);
             solutionStepsDiv.textContent = `打亂步驟: ${currentScramble}`;
 
-            // 2. Apply the generated scramble sequence to the cube state
-            console.log("Applying sequence to state...");
-            cubeState.applySequence(currentScramble); // Apply the current scramble
-            console.log("Sequence applied.");
-            // Removed duplicate log and incorrect applySequence call
+            // 2. Animate the scramble sequence step-by-step
+            const moves = currentScramble.trim().split(/\s+/);
+            console.log("Animating scramble sequence...");
+            solutionStepsDiv.textContent = `打亂動畫中: ${currentScramble}`; // Show full sequence initially
 
-            // 3. Update renderer colors to reflect the new state
+            for (const move of moves) {
+                if (!move) continue; // Skip empty strings if any
+                console.log(`Animating move: ${move}`);
+                try {
+                    // Animate the move visually
+                    await renderer.animateRotation(move, 1000); // Wait for 1s animation
+
+                    // Update the internal state AFTER the visual animation completes
+                    cubeState.applyMove(move);
+
+                    // Optional: Update colors based on state (might be redundant if animation handles visuals)
+                    // renderer.updateColors(cubeState.getState());
+
+                    console.log(`Move ${move} applied to state.`);
+
+                } catch (error) {
+                    console.error(`Error animating move ${move}:`, error);
+                    solutionStepsDiv.textContent = `動畫錯誤於步驟 ${move}: ${error.message}`;
+                    // Decide how to handle error - break, continue? For now, break.
+                    break;
+                }
+            }
+
+            // 3. Final color update after all animations (ensures consistency)
             renderer.updateColors(cubeState.getState());
-            console.log("Renderer colors updated.");
+            console.log("Scramble animation finished. Renderer colors updated.");
+            solutionStepsDiv.textContent = `打亂完成: ${currentScramble}`;
+
+            randomizeBtn.disabled = false; // Re-enable button
+            solveBtn.disabled = false;
         });
 
+        // TODO: Update solveBtn listener similarly to animate the solution sequence
         solveBtn.addEventListener('click', () => {
+             if (renderer.isAnimating) {
+                console.log("Animation in progress, ignoring solve click.");
+                return;
+            }
             console.log("Solve button clicked");
 
             if (!lastScrambleSequence) {
